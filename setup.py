@@ -11,7 +11,7 @@ with open('README.rst') as readme_file:
 with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
-requirements = []
+requirements = ['pandas']
 
 setup_requirements = ['pytest-runner', ]
 
@@ -47,4 +47,5 @@ setup(
     url='https://github.com/mbjoseph/finnemit',
     version='0.1.0',
     zip_safe=False,
+    package_data={"finnemit": ["finnemit/data/*.csv"]}
 )
