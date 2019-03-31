@@ -441,7 +441,7 @@ for j in range(ngoodfires):  # edited this to have ngoodfires instead of nfires 
     if tree[j] > 40 and tree[j] <= 60:    # WOODLAND
         # yk: fixed based on Ito 2004
         # CF3 = exp(-0.013*(tree[j]/100.))     # Apply to all herbaceous fuels
-        CF3 = exp(-0.013*tree[j])     # Apply to all herbaceous fuels
+        CF3 = np.exp(-0.013*tree[j])     # Apply to all herbaceous fuels
         CF1 = 0.30                   # Apply to all coarse fuels in woodlands From Ito and Penner [2004]
 
     if tree[j] <= 40:        # GRASSLAND
@@ -544,7 +544,7 @@ for j in range(ngoodfires):  # edited this to have ngoodfires instead of nfires 
     # Emissions = area*BE*BMASS*EF
     # Convert units to consistent units
     areanow = area[j]*1.0e6 # convert km2 --> m2
-    bmass = bmass/1000. # convert g dm/m2 to kg dm/m2
+    bmass = bmass1/1000. # convert g dm/m2 to kg dm/m2
 
 
     # CW: MAY 29, 2015: Scale grassland and cropland fire areas
@@ -602,20 +602,14 @@ for j in range(ngoodfires):  # edited this to have ngoodfires instead of nfires 
         TOTGRAS = TOTGRAS+bmassburn
         TOTGRASarea = TOTGRASarea+areanow
 
-
     # units being output are in kg/day/fire
-    # ####################################################
-    # Print to Output file
-    # ####################################################
-    # NEW PRINT STATEMENT, 02/04/2019
-    #       printf, 6, 'longi,lat,polyid,fireid,jd,lct,genLC,pcttree,pctherb,pctbare,area,bmass,CO,NOx,NO,NO2,NH3,SO2,NMOC,PM25,PM10,OC,BC'
-    #       form = '(D20.10,",",D20.10,",",(5(I10,",")),16(D25.10,","))'
-    print(lon[j],lat[j],polyid[j],fireid[j],jd[j],lct[j],genveg,tree[j],herb[j],bare[j],areanow,bmass,CO,NOx,NO,NO2,NH3,SO2,NMOC,PM25,PM10,OC,BC)
+    df_rows.append((lon[j],lat[j],polyid[j],fireid[j],jd[j],lct[j],genveg,tree[j],herb[j],bare[j],
+                    areanow,bmass,CO,NOX,NO,NO2,NH3,SO2,NMOC,PM25,PM10,OC,BC))
 
     # Calculate Global Sums
     COtotal = CO+COtotal
     NMOCtotal = NMOC+NMOCtotal
-    NOXtotal = NOXtotal+NOx
+    NOXtotal = NOXtotal+NOX
     SO2total = SO2total+SO2
     PM25total = PM25total+PM25
     OCtotal = OCtotal+OC
@@ -624,9 +618,11 @@ for j in range(ngoodfires):  # edited this to have ngoodfires instead of nfires 
     PM10total = PM10total+PM10
     AREAtotal = AREAtotal+areanow # m2
 
-# ####################################################
-# End loop over Fires
-# ####################################################
+
+# Write output to csv
+index = 'longi,lat,polyid,fireid,jd,lct,genLC,pcttree,pctherb,pctbare,area,bmass,CO,NOx,NO,NO2,NH3,SO2,NMOC,PM25,PM10,OC,BC'.split(',')
+out_df = pd.DataFrame(df_rows, columns=index)
+out_df.to_csv('~/Desktop/out.csv')
 
 
 # PRINT SUMMARY TO LOG FILE
