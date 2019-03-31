@@ -1,38 +1,19 @@
 # -*- coding: utf-8 -*-
 """Tests for `finnemit` package."""
 
-import pytest
-import random
-
-from finnemit import finnemit
-
-
-@pytest.fixture
-def generate_numbers():
-    """Sample pytest fixture. Generates list of random integers.
-
-    See more at: http://doc.pytest.org/en/latest/fixture.html
-    """
-
-    return random.sample(range(100),10)
+import pkg_resources
+import os
+from finnemit import get_emissions
 
 
-def test_sum_numbers(generate_numbers):
-    """Sample test function for sum_numbers, using pytest fixture."""
-
-    our_result = finnemit.sum_numbers(generate_numbers)
-    assert our_result == sum(generate_numbers)
-
-
-def test_max_number(generate_numbers):
-    """Sample test function for max_number, using pytest fixture."""
-
-    our_result = finnemit.max_number(generate_numbers)
-    assert our_result == max(generate_numbers)
+def test_csv_output(tmpdir):
+    infile = pkg_resources.resource_filename("finnemit", "data/example-input.csv")
+    outfile = os.path.join(str(tmpdir), "out.csv")
+    get_emissions(infile, outfile)
+    assert os.path.isfile(outfile)
 
 
-# def test_max_number_bad(generate_numbers):
-#     """Sample test function that fails. Uncomment to see."""
-#
-#     our_result = finnemit.max_number(generate_numbers)
-#     assert our_result == max(generate_numbers) + 1
+def test_dict_returned(tmpdir):
+    infile = pkg_resources.resource_filename("finnemit", "data/example-input.csv")
+    outfile = os.path.join(str(tmpdir), "out.csv")
+    assert isinstance(get_emissions(infile, outfile), dict)
