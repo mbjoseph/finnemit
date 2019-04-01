@@ -23,7 +23,8 @@ pip install git+https://github.com/mbjoseph/finnemit
 
 The main function in the finnemit library is `get_emissions`, which takes
 as input a path to a CSV file generated using the FINN preprocessor, and
-an output path:
+an output path.
+In python:
 
 
 ```python
