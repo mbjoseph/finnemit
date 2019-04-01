@@ -15,18 +15,3 @@ script: tox
 
 # Codecov after success
 after_success: codecov
-
-# Assuming you have installed the travis-ci CLI tool, after you
-# create the Github repo and add it to Travis, run the
-# following command to finish PyPI deployment setup:
-# $ travis encrypt --add deploy.password
-deploy:
-  provider: pypi
-  distributions: sdist bdist_wheel
-  user: mbjoseph
-  password:
-    secure: PLEASE_REPLACE_ME
-  on:
-    tags: true
-    repo: mbjoseph/finnemit
-    python: 3.6
