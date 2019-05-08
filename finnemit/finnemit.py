@@ -26,9 +26,6 @@ def get_emissions(infile, outfile=None):
     # NOTE: ONLY LCT - Don't really need this
     scen = 1
     scename = "scen1"
-    simid = "TEST1"
-    todaydate = "02092019"  # this is for naming the output file
-    yearnum = 2012
 
     # SETTING UP VARIABLES To CHECK TOTALS AT THE END OF The FILE
 
@@ -61,7 +58,6 @@ def get_emissions(infile, outfile=None):
     fuel = pd.read_csv(fuelin)
 
     #   Set up fuel arrays
-    globreg2 = fuel["Global Region"].values
     tffuel = fuel["Tropical Forest"].values  # tropical forest fuels
     tefuel = fuel["Temperate Forest"].values  # temperate forest fuels
     bffuel = fuel["Boreal Forest"].values  # boreal forest fuels
@@ -75,8 +71,6 @@ def get_emissions(infile, outfile=None):
     lctfuelin = pkg_resources.resource_filename("finnemit",
                                                 "data/land-cover-gm2.csv")
     lctfuel = pd.read_csv(lctfuelin)
-
-    lctfuelid = lctfuel["Code"].values
     lcttree = lctfuel["final TREE"].values
     lctherb = lctfuel["final HERB"].values
 
@@ -87,23 +81,13 @@ def get_emissions(infile, outfile=None):
     emis = pd.read_csv(emisin)
 
     #   Set up Emission Factor Arrays
-    lctemis = emis["LCT"].values  # LCT Type (Added 10/20/2009)
-    vegemis = emis[
-        "GenVegType"
-    ].values  # generic vegetation type --> this is ignored in model
-    CO2EF = emis["CO2"].values  # CO2 emission factor
     COEF = emis["CO"].values  # CO emission factor
-    CH4EF = emis["CH4"].values  # CH4 emission factor
-    NMHCEF = emis["NMHC"].values  # NMHC emission factor
     NMOCEF = emis["NMOC"].values  # NMOC emission factor (added 10/20/2009)
-    H2EF = emis["H2"].values  # H2 emission factor
     NOXEF = emis["NOXasNO"].values  # NOx emission factor
     NOEF = emis["NO"].values  # NO emission factors (added 10/20/2009)
     NO2EF = emis["NO2"].values  # NO2 emission factors (added 10/20/2009)
     SO2EF = emis["SO2"].values  # SO2 emission factor
     PM25EF = emis["PM25"].values  # PM2.5 emission factor
-    TPMEF = emis["TPM"].values  # TPM emission factor
-    TCEF = emis["TPC"].values  # TPC emission factor
     OCEF = emis["OC"].values  # OC emission factor
     BCEF = emis["BC"].values  # BC emission factor
     NH3EF = emis["NH3"].values  # NH3 emission factor
@@ -115,7 +99,8 @@ def get_emissions(infile, outfile=None):
     if outfile is None:
         outfile = re.sub("\\.csv$", "_out.csv", infile)
     map = pd.read_csv(infile)
-
+    map = map[map['v_regnum'].notnull()]
+    
     nfires = map.shape[0]
 
     polyid = map["polyid"].values
@@ -137,7 +122,7 @@ def get_emissions(infile, outfile=None):
     globreg = map["v_regnum"].values
 
     # Total Number of fires input in original input file
-    numorig = nfires  # MJ: may be able to remove this
+    numorig = nfires
 
     # Added 08/25/08: removed values of -9999 from VCF inputs
     tree[tree < 0] = 0
@@ -149,13 +134,13 @@ def get_emissions(infile, outfile=None):
     totcov = tree + herb + bare
     # number of records where total coverate is less than 100%
     nummissvcf = sum(totcov < 98)
+    assert nummissvcf == 0
 
     # parse dates
     dates = [datetime.datetime.strptime(d, "%Y-%m-%d") for d in date]
 
-    jd = [d.timetuple().tm_yday for d in dates]  # julian date
-    mo = [d.month for d in dates]
-    dy = [d.day for d in dates]
+    jd = np.array([d.timetuple().tm_yday for d in dates])  # julian date
+    mo = np.array([d.month for d in dates])
 
     ngoodfires = len(jd)
     print("the number of fires = {}".format(ngoodfires))
@@ -176,28 +161,6 @@ def get_emissions(infile, outfile=None):
     overlapct = 0  # added 02/29/2009
     urbnum = 0  # added 10/20/2009
 
-    # Sort fires in order of JD
-    index2 = np.argsort(jd)
-    lat = lat[index2]
-    lon = lon[index2]
-
-    polyid = polyid[index2]
-    fireid = fireid[index2]
-
-    tree = tree[index2]
-    herb = herb[index2]
-    bare = bare[index2]
-    lct = lct[index2]
-    flct = flct[index2]
-    jd = np.array(jd)[index2]
-
-    # yk: save month for diagnosis
-    mo = np.array(mo)[index2]
-    totcov = totcov[index2]
-    area = area[index2]
-    # yk: for qa, hold onto original land cover values
-    lctorig = lct
-
     # yk: scenuse# actual algorithm being used when falling back to,
     # eg. LCT, for various rasons
     # CW - 02/04/2019 - don't know what this is??
@@ -214,7 +177,7 @@ def get_emissions(infile, outfile=None):
     NH3total = 0.0
     PM10total = 0.0
     AREAtotal = 0.0  # added 06/21/2011
-    BMASStotal = 0.0  # Addded 06/21/2011
+    bmasstotal = 0.0  # Addded 06/21/2011
 
     # ****************************************************************************
     # START LOOP OVER ALL FIRES: CALCULATE EMISSIONS
@@ -273,19 +236,13 @@ def get_emissions(infile, outfile=None):
                 bare[j] = 0.0
 
             if (
-                lct[j] >= 6 and lct[j] <= 8 or lct[j] == 11 or lct[j] == 14
+                (lct[j] >= 6 and lct[j] <= 8) or lct[j] == 11 or lct[j] == 14
             ):  # Assign woody savanna to the pixel
                 tree[j] = 50.0
                 herb[j] = 50.0
                 bare[j] = 0.0
 
-            if (
-                lct[j] == 9
-                or lct[j] == 10
-                or lct[j] == 12
-                or lct[j] == 13
-                or lct[j] == 16
-            ):  # Assign grassland to the pixel
+            if lct[j] in [9, 10, 12, 13, 16]:  # Assign as grassland
                 tree[j] = 20.0
                 herb[j] = 80.0
                 bare[j] = 0.0
@@ -418,8 +375,9 @@ def get_emissions(infile, outfile=None):
                 "Globreg =",
                 globreg[j],
             )
+            continue
 
-        # Bmass now gets calculated as a function of tree cover, too.
+        # bmass now gets calculated as a function of tree cover, too.
         if genveg == 9:
             bmass1 = 902.0  # 02/08/2019 changed from 1200. based on
             # Akagi, van Leewuen and McCarty
@@ -431,15 +389,15 @@ def get_emissions(infile, outfile=None):
                 bmass1 = 1100.0
 
         if genveg == 1:
-            bmass1 = grfuel[reg]
+            bmass1 = grfuel[int(reg)]
         if genveg == 2:
-            bmass1 = wsfuel[reg]
+            bmass1 = wsfuel[int(reg)]
         if genveg == 3:
-            bmass1 = tffuel[reg]
-        if genveg == 4 or genveg == 6:
-            bmass1 = tefuel[reg]  # Added in new genveg == 6 here (06/20/2014)
+            bmass1 = tffuel[int(reg)]
+        if genveg in [4, 6]:
+            bmass1 = tefuel[int(reg)]  # Added in new genveg == 6 here (06/20/2014)
         if genveg == 5:
-            bmass1 = bffuel[reg]
+            bmass1 = bffuel[int(reg)]
 
         if genveg == 0:
             print(
@@ -448,12 +406,13 @@ def get_emissions(infile, outfile=None):
                 "Something is WRONG with generic vegetation. genveg = 0",
             )
             genveg0 = genveg0 + 1
+            continue
 
         # DEC. 09, 2009: Added correction
         # Assign boreal forests in Southern Asia the biomass density of the
         # temperate forest for the region
         if genveg == 5 and globreg[j] == 11:
-            bmass1 = tefuel[reg]
+            bmass1 = tefuel[int(reg)]
 
         if bmass1 == -1:
             print("Fire number:", j, " removed. bmass assigned -1!")
@@ -466,6 +425,7 @@ def get_emissions(infile, outfile=None):
                 reg,
             )
             bmass0 = bmass0 + 1
+            continue
 
         # Assign Burning Efficiencies based on Generic
         #   land cover (Hoezelmann et al. [2004] Table 5
@@ -478,7 +438,7 @@ def get_emissions(infile, outfile=None):
             CF5 = 0.90  # Litter Biomass
             CF6 = 0.30  # Dead woody
 
-        if tree[j] > 40 and tree[j] <= 60:  # WOODLAND
+        if 40 < tree[j] <= 60:  # WOODLAND
             # yk: fixed based on Ito 2004
             # CF3 = exp(-0.013*(tree[j]/100.))
             CF3 = np.exp(-0.013 * tree[j])  # Apply to all herbaceous fuels
@@ -491,14 +451,14 @@ def get_emissions(infile, outfile=None):
         # Calculate the Mass burned of each classification
         # (herbaceous, woody, and forest)
         # These are in units of g dry matter/m2
-        # Bmass is the total burned biomass
+        # bmass is the total burned biomass
         # Mherb is the Herbaceous biomass burned
         # Mtree is the Woody biomass burned
 
         pctherb = herb[j] / 100.0
         pcttree = tree[j] / 100.0
         coarsebm = bmass1
-        herbbm = grfuel[reg]
+        herbbm = grfuel[int(reg)]
 
         # ###################################################################
         # 02/08/2019
@@ -516,21 +476,21 @@ def get_emissions(infile, outfile=None):
         # DETERMINE BIOMASS BURNED
         #  Grasslands
         if tree[j] <= 40:
-            Bmass = (pctherb * herbbm * CF3) + (pcttree * herbbm * CF3)
+            bmass = (pctherb * herbbm * CF3) + (pcttree * herbbm * CF3)
             # Assumed here that litter biomass = herbaceous biomass and that
             #   the percent tree
             #   in a grassland cell contributes to fire fuels... CHECK THIS!!!
             # Assuming here that the duff and litter around trees burn
 
         # Woodlands
-        if tree[j] > 40 and tree[j] <= 60:
-            Bmass = (pctherb * herbbm * CF3) + (
+        if 40 < tree[j] <= 60:
+            bmass = (pctherb * herbbm * CF3) + (
                 pcttree * (herbbm * CF3 + coarsebm * CF1)
             )
 
         # Forests
         if tree[j] > 60:
-            Bmass = (pctherb * herbbm * CF3) + (
+            bmass = (pctherb * herbbm * CF3) + (
                 pcttree * (herbbm * CF3 + coarsebm * CF1)
             )
 
@@ -543,7 +503,6 @@ def get_emissions(infile, outfile=None):
         if genveg == -1 or genveg == 0:
             print("Fire_emis> ERROR genveg not set correctly: ")
             print(" scen (orig/used): ", scen, scenuse[j])
-            print(" lc_orig(M/G/F/FC/T/TC): ", [lctorig[j]])
             print(" lc_new (M/G/F/FC/T/TC): ", [lct[j]])
             print(" tree: ", tree[j])
             print(" genveg: ", genveg)
@@ -590,7 +549,7 @@ def get_emissions(infile, outfile=None):
         # Emissions = area*BE*BMASS*EF
         # Convert units to consistent units
         areanow = area[j] * 1.0e6  # convert km2 --> m2
-        bmass = bmass1 / 1000.0  # convert g dm/m2 to kg dm/m2
+        bmass = bmass / 1000.0  # convert g dm/m2 to kg dm/m2
 
         # CW: MAY 29, 2015: Scale grassland and cropland fire areas
         # 02/04/2019 - removing ths scaling for crop/grassland fires.
@@ -620,7 +579,7 @@ def get_emissions(infile, outfile=None):
 
         # Calculate totals for log file
         bmassburn = bmass * areanow  # kg burned
-        BMASStotal = bmassburn + BMASStotal  # kg
+        bmasstotal = bmassburn + bmasstotal  # kg
 
         if genveg == 3:
             TOTTROP = TOTTROP + bmassburn
@@ -657,6 +616,7 @@ def get_emissions(infile, outfile=None):
                 fireid[j],
                 jd[j],
                 lct[j],
+                globreg[j],
                 genveg,
                 tree[j],
                 herb[j],
@@ -689,6 +649,7 @@ def get_emissions(infile, outfile=None):
         PM10total = PM10total + PM10
         AREAtotal = AREAtotal + areanow  # m2
 
+
     # Write output to csv
     index = [
         "longi",
@@ -697,6 +658,7 @@ def get_emissions(infile, outfile=None):
         "fireid",
         "jd",
         "lct",
+        "globreg",
         "genLC",
         "pcttree",
         "pctherb",
@@ -716,6 +678,7 @@ def get_emissions(infile, outfile=None):
         "BC",
     ]
     out_df = pd.DataFrame(df_rows, columns=index)
+    out_df = out_df.sort_values(by=['jd'])
     out_df.to_csv(outfile)
 
     # collect summary json
@@ -743,7 +706,7 @@ def get_emissions(infile, outfile=None):
         + genveg0
         + bmass0
         + confnum,
-        "GLOBAL TOTAL (Tg) biomass burned (Tg)": BMASStotal / 1.0e9,
+        "GLOBAL TOTAL (Tg) biomass burned (Tg)": bmasstotal / 1.0e9,
         "Total Temperate Forests (Tg)": TOTTEMP / 1.0e9,
         "Total Tropical Forests (Tg)": TOTTROP / 1.0e9,
         "Total Boreal Forests (Tg)": TOTBOR / 1.0e9,
