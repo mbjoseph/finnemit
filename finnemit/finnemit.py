@@ -100,7 +100,7 @@ def get_emissions(infile, outfile=None):
         outfile = re.sub("\\.csv$", "_out.csv", infile)
     map = pd.read_csv(infile)
     map = map[map['v_regnum'].notnull()]
-    
+
     nfires = map.shape[0]
 
     polyid = map["polyid"].values
@@ -614,6 +614,7 @@ def get_emissions(infile, outfile=None):
                 lat[j],
                 polyid[j],
                 fireid[j],
+                date[j],
                 jd[j],
                 lct[j],
                 globreg[j],
@@ -656,6 +657,7 @@ def get_emissions(infile, outfile=None):
         "lat",
         "polyid",
         "fireid",
+        "date",
         "jd",
         "lct",
         "globreg",
