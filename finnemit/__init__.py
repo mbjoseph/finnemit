@@ -8,3 +8,4 @@ __version__ = "0.1.0"
 
 
 from .finnemit import get_emissions  # noqa
+from .speciate import speciate  # noqa

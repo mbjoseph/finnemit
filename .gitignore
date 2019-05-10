@@ -101,5 +101,7 @@ ENV/
 # mypy
 .mypy_cache/
 
-Untitled*.ipynb
+*\.ipynb
 *_out.csv
+*_log.csv
+*_species.csv
