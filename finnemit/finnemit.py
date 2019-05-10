@@ -68,16 +68,18 @@ def get_emissions(infile, outfile=None):
     # 02/08/2019
     # READ in LCT Fuel loading file from prior Texas FINN study
     # This is a secondary fuel loading file for use in US ONLY
-    lctfuelin = pkg_resources.resource_filename("finnemit",
-                                                "data/land-cover-gm2.csv")
+    lctfuelin = pkg_resources.resource_filename(
+        "finnemit", "data/land-cover-gm2.csv"
+    )
     lctfuel = pd.read_csv(lctfuelin)
     lcttree = lctfuel["final TREE"].values
     lctherb = lctfuel["final HERB"].values
 
     # EMISSION FACTOR FILE
     # READ IN EMISSION FACTOR FILE
-    emisin = pkg_resources.resource_filename("finnemit",
-                                             "data/emission-factors.csv")
+    emisin = pkg_resources.resource_filename(
+        "finnemit", "data/emission-factors.csv"
+    )
     emis = pd.read_csv(emisin)
 
     #   Set up Emission Factor Arrays
@@ -99,7 +101,7 @@ def get_emissions(infile, outfile=None):
     if outfile is None:
         outfile = re.sub("\\.csv$", "_out.csv", infile)
     map = pd.read_csv(infile)
-    map = map[map['v_regnum'].notnull()]
+    map = map[map["v_regnum"].notnull()]
 
     nfires = map.shape[0]
 
@@ -395,7 +397,9 @@ def get_emissions(infile, outfile=None):
         if genveg == 3:
             bmass1 = tffuel[int(reg)]
         if genveg in [4, 6]:
-            bmass1 = tefuel[int(reg)]  # Added in new genveg == 6 here (06/20/2014)
+            bmass1 = tefuel[
+                int(reg)
+            ]  # Added in new genveg == 6 here (06/20/2014)
         if genveg == 5:
             bmass1 = bffuel[int(reg)]
 
@@ -650,7 +654,6 @@ def get_emissions(infile, outfile=None):
         PM10total = PM10total + PM10
         AREAtotal = AREAtotal + areanow  # m2
 
-
     # Write output to csv
     index = [
         "longi",
@@ -680,7 +683,7 @@ def get_emissions(infile, outfile=None):
         "BC",
     ]
     out_df = pd.DataFrame(df_rows, columns=index)
-    out_df = out_df.sort_values(by=['jd'])
+    out_df = out_df.sort_values(by=["jd"])
     out_df.to_csv(outfile)
 
     # collect summary json

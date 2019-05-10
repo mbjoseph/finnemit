@@ -2,6 +2,7 @@
 
 import pkg_resources
 import pandas as pd
+import re
 
 
 def speciate(infile, outfile=None):
@@ -97,7 +98,7 @@ def speciate(infile, outfile=None):
     XYLENEemis = [None] * nfires
     XYLOLemis = [None] * nfires
 
-    for i in range(n_fires):
+    for i in range(nfires):
         if genveg[i] in [7, 8, 11, 12]:
             raise ValueError("Invalid vegetation type")
 
@@ -251,15 +252,13 @@ def speciate(infile, outfile=None):
     out_df.to_csv(outfile)
 
     # Generate log
-    logfile_name = re.sub("species\\.csv$", "log.csv", outfile)
+    logfile_name = re.sub("\\.csv$", "_log.txt", outfile)
     with open(logfile_name, "w") as log:
         log.write(" " + "\n")
         log.write("The input file was: " + infile + "\n")
         log.write("The speciation file was: " + sfile + "\n")
         log.write(" " + "\n")
-        log.write(
-            "Original from fire emissions model before speciation" + "\n"
-        )
+        log.write("Original from fire emissions model before speciation" + "\n")
         log.write(
             "The total CO emissions (moles, Tg) =  "
             + str(sum(COemis))
@@ -299,13 +298,13 @@ def speciate(infile, outfile=None):
             + "\n"
         )
         log.write(
-            "The total VOC emissions (Tg) =" + str(sum(VOC) / 1.0e9) + "\n"
+            "The total VOC emissions (Tg) = " + str(sum(VOC) / 1.0e9) + "\n"
         )
         log.write(
-            "The total OC emissions (Tg) =" + str(sum(OCemis) / 1.0e9) + "\n"
+            "The total OC emissions (Tg) = " + str(sum(OCemis) / 1.0e9) + "\n"
         )
         log.write(
-            "The total BC emissions (Tg) =" + str(sum(BCemis) / 1.0e9) + "\n"
+            "The total BC emissions (Tg) = " + str(sum(BCemis) / 1.0e9) + "\n"
         )
         log.write(
             "The total PM10 emissions (Tg) = "
@@ -320,32 +319,34 @@ def speciate(infile, outfile=None):
         log.write(" " + "\n")
         log.write("SUMMARY FROM MOZART4 speciation" + "\n")
         log.write(
-            "The total BIGENE emissio (moles) =" + str(sum(BIGENEemis)) + "\n"
+            "The total BIGENE emissio (moles) = " + str(sum(BIGENEemis)) + "\n"
         )
         log.write(
-            "The total C2H6 emissions (moles) ="
+            "The total C2H6 emissions (moles) = "
             + str(sum(C2H6emis))
             + ", and in Tg = "
             + str(sum(C2H6emis) * 30.07 / 1.0e12)
             + "\n"
         )
-        log.write("The total MEK emissions (moles) =" + str(sum(MEKemis)))
         log.write(
-            "The total TOLUENE emiss (moles) ="
+            "The total MEK emissions (moles) = " + str(sum(MEKemis)) + "\n"
+        )
+        log.write(
+            "The total TOLUENE emiss (moles) = "
             + str(sum(TOLUENEemis))
             + ", and in Tg = "
             + str(sum(TOLUENEemis) * 90.1 / 1.0e12)
             + "\n"
         )
         log.write(
-            "The total CH2O emissions (moles) ="
+            "The total CH2O emissions (moles) = "
             + str(sum(CH2Oemis))
             + ", and in Tg = "
             + str(sum(CH2Oemis) * 30.3 / 1.0e12)
             + "\n"
         )
         log.write(
-            "The total HCOOH emissions (moles) ="
+            "The total HCOOH emissions (moles) = "
             + str(sum(HCOOHemis))
             + ", and in Tg = "
             + str(sum(HCOOHemis) * 47.02 / 1.0e12)
@@ -474,6 +475,7 @@ def speciate(infile, outfile=None):
         log.write("BC, " + str(sum(BC[MXCA]) / 1.0e6) + "\n")
         log.write("PM2.5, " + str(sum(PM25[MXCA]) / 1.0e6) + "\n")
         log.write("PM10, " + str(sum(PM10[MXCA]) / 1.0e6) + "\n")
+
 
 # TODO:
 # - experiment with speciation logfile (ensure proper formatting)
