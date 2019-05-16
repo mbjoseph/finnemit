@@ -13,13 +13,20 @@ import numpy as np
 import pkg_resources
 
 
-def get_emissions(infile, outfile=None):
+def get_emissions(infile, outfile=None, fuelin=None, emisin=None):
     """Get emissions estimates with FINN
 
     Args:
         infile (str) - path to input file
-        outfile (str) - path to output file. If None, then this is
+        outfile (str) - optional path to output file. If None, then this is
             constructed by appending '_output' to the input filename
+        fuelin (str) - optional path to a fuel loading file. This must be
+            formatted like the file finnemit/data/fuel-loads.csv
+        emisin (str) - optional path to an emissions file. This must be
+            formatted like the file finnemit/data/emission-factors.csv
+
+    Returns:
+        A dictionary summarizing emission totals, and writes a file to outfile.
     """
 
     # USER INPUTS --- EDIT DATE AND SCENARIO HERE - this is for file naming
@@ -53,8 +60,9 @@ def get_emissions(infile, outfile=None):
     #  from v1.5 -- going back to global fuel loadings
     #  READ IN FUEL LOADING FILE
     #  02/08/2019: ALL FUEL INPUTS ARE IN g/m2
-
-    fuelin = pkg_resources.resource_filename("finnemit", "data/fuel-loads.csv")
+    if fuelin is None:
+        fuelin = pkg_resources.resource_filename("finnemit",
+                                                 "data/fuel-loads.csv")
     fuel = pd.read_csv(fuelin)
 
     #   Set up fuel arrays
@@ -76,10 +84,10 @@ def get_emissions(infile, outfile=None):
     lctherb = lctfuel["final HERB"].values
 
     # EMISSION FACTOR FILE
-    # READ IN EMISSION FACTOR FILE
-    emisin = pkg_resources.resource_filename(
-        "finnemit", "data/emission-factors.csv"
-    )
+    if emisin is None:
+        emisin = pkg_resources.resource_filename(
+            "finnemit", "data/emission-factors.csv"
+        )
     emis = pd.read_csv(emisin)
 
     #   Set up Emission Factor Arrays

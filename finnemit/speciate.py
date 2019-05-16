@@ -5,9 +5,22 @@ import pandas as pd
 import re
 
 
-def speciate(infile, outfile=None):
+def speciate(infile, outfile=None, sfile=None):
+    """Get speciated estimates with FINN
 
-    sfile = pkg_resources.resource_filename("finnemit", "data/speciation.csv")
+    Args:
+        infile (str) - path to input file (this should be an outfile file
+            written by the get_emissions() function).
+        outfile (str) - optional path to output file. If None, then this is
+            constructed by appending '_species' to the input filename.
+        sfile (str) - optional path to a speciation file. This must be
+            formatted like the file finnemit/data/speciation.csv.
+
+    Returns:
+        A dictionary summarizing emission totals, and writes a file to outfile.
+    """
+    if sfile is None:
+        sfile = pkg_resources.resource_filename("finnemit", "data/speciation.csv")
     speciate = pd.read_csv(sfile)
 
     sav = speciate["Savanna"]
@@ -21,8 +34,6 @@ def speciate(infile, outfile=None):
         outfile = re.sub("\\.csv$", "_species.csv", infile)
 
     fire = pd.read_csv(infile)
-
-    # todo check whether these really need to be defined as variables
     longi = fire["longi"]
     lati = fire["lat"]
     polyid = fire["polyid"]
@@ -475,8 +486,3 @@ def speciate(infile, outfile=None):
         log.write("BC, " + str(sum(BC[MXCA]) / 1.0e6) + "\n")
         log.write("PM2.5, " + str(sum(PM25[MXCA]) / 1.0e6) + "\n")
         log.write("PM10, " + str(sum(PM10[MXCA]) / 1.0e6) + "\n")
-
-
-# TODO:
-# - experiment with speciation logfile (ensure proper formatting)
-# - write tests for speciation code
