@@ -11,7 +11,25 @@ This library ingests a comma separated values (CSV) file generated from the FINN
 pre-processor (https://github.com/yosukefk/finn_preproc), and generates a
 CSV file with estimated emissions for a variety of compounds.
 
-## Installation
+## Installing Python
+
+If you already have python and pip installed, you can ignore this section.
+If you do not have Python 3 installed, we recommend using Anaconda to install it
+and pip.
+For instructions see https://docs.anaconda.com/anaconda/install/
+
+Once Anaconda is installed, create a virtual environment for FINN from
+the terminal and ensure that pip is installed:
+
+```bash
+conda create -n finn
+conda activate finn
+conda install pip
+```
+
+
+
+## Installing finnemit
 
 Assuming you have python and pip installed:
 
