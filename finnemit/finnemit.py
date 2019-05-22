@@ -126,7 +126,7 @@ def get_emissions(infile, outfile=None, fuelin=None, emisin=None):
     herb = map["v_herb"].values
     bare = map["v_bare"].values
 
-    lct = map["v_lct"].values
+    lct = map["v_lct"].values.astype(int)
     flct = map["f_lct"].values
 
     globreg = map["v_regnum"].values
