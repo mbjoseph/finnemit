@@ -77,11 +77,18 @@ def get_emissions(infile, outfile=None, fuelin=None, emisin=None):
     # READ in LCT Fuel loading file from prior Texas FINN study
     # This is a secondary fuel loading file for use in US ONLY
     lctfuelin = pkg_resources.resource_filename(
-        "finnemit", "data/land-cover-gm2.csv"
+        "finnemit", "data/LCTFuelLoad_fuel4_revisit20190521.csv"
     )
     lctfuel = pd.read_csv(lctfuelin)
-    lcttree = lctfuel["final TREE"].values
-    lctherb = lctfuel["final HERB"].values
+    # she should standarize the column name!!
+    try:
+        lcttree = lctfuel["final TREE"].values
+    except:
+        lcttree = lctfuel["TREE"].values
+    try:
+        lctherb = lctfuel["final HERB"].values
+    except:
+        lctherb = lctfuel["HERB"].values
 
     # EMISSION FACTOR FILE
     if emisin is None:
