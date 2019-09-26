@@ -3,7 +3,7 @@ FINN Emitter
 
 [![Build Status](https://travis-ci.org/mbjoseph/finnemit.svg?branch=master)](https://travis-ci.org/mbjoseph/finnemit)
 [![codecov](https://codecov.io/gh/mbjoseph/finnemit/branch/master/graph/badge.svg)](https://codecov.io/gh/mbjoseph/finnemit)
-
+[![Build status](https://ci.appveyor.com/api/projects/status/qv2aafjgh6va1lar/branch/master?svg=true)](https://ci.appveyor.com/project/mbjoseph/finnemit/branch/master)
 
 
 Emissions estimates for the Fire Inventory (FINN) wildfire emissions model (Wiedinmyer et al. 2011).
