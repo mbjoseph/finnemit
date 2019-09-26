@@ -110,6 +110,8 @@ def get_emissions(infile, outfile=None, fuelin=None, emisin=None):
         outfile = re.sub("\\.csv$", "_out.csv", infile)
     map = pd.read_csv(infile)
     map = map[map["v_regnum"].notnull()]
+    # pandas dont have interger NA, so we can either put unused value, or just filter out, like Max is doing above
+    map = map[map["v_lct"].notnull()]
 
     nfires = map.shape[0]
 
@@ -126,7 +128,8 @@ def get_emissions(infile, outfile=None, fuelin=None, emisin=None):
     herb = map["v_herb"].values
     bare = map["v_bare"].values
 
-    lct = map["v_lct"].values
+    # as lct is used as array index, it has to be integer of some kind
+    lct = map["v_lct"].values.astype(int)
     flct = map["f_lct"].values
 
     globreg = map["v_regnum"].values
