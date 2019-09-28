@@ -77,18 +77,11 @@ def get_emissions(infile, outfile=None, fuelin=None, emisin=None):
     # READ in LCT Fuel loading file from prior Texas FINN study
     # This is a secondary fuel loading file for use in US ONLY
     lctfuelin = pkg_resources.resource_filename(
-        "finnemit", "data/LCTFuelLoad_fuel4_revisit20190521.csv"
+        "finnemit", "data/land-cover-gm2.csv"
     )
     lctfuel = pd.read_csv(lctfuelin)
-    # she should standarize the column name!!
-    try:
-        lcttree = lctfuel["final TREE"].values
-    except:
-        lcttree = lctfuel["TREE"].values
-    try:
-        lctherb = lctfuel["final HERB"].values
-    except:
-        lctherb = lctfuel["HERB"].values
+    lcttree = lctfuel["TREE"].values
+    lctherb = lctfuel["HERB"].values
 
     # EMISSION FACTOR FILE
     if emisin is None:
@@ -116,8 +109,8 @@ def get_emissions(infile, outfile=None, fuelin=None, emisin=None):
     if outfile is None:
         outfile = re.sub("\\.csv$", "_out.csv", infile)
     map = pd.read_csv(infile)
+    # TODO track count of these dropped record
     map = map[map["v_regnum"].notnull()]
-    # pandas dont have interger NA, so we can either put unused value, or just filter out, like Max is doing above
     map = map[map["v_lct"].notnull()]
 
     nfires = map.shape[0]
