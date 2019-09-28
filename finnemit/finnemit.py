@@ -80,8 +80,8 @@ def get_emissions(infile, outfile=None, fuelin=None, emisin=None):
         "finnemit", "data/land-cover-gm2.csv"
     )
     lctfuel = pd.read_csv(lctfuelin)
-    lcttree = lctfuel["final TREE"].values
-    lctherb = lctfuel["final HERB"].values
+    lcttree = lctfuel["TREE"].values
+    lctherb = lctfuel["HERB"].values
 
     # EMISSION FACTOR FILE
     if emisin is None:
@@ -109,7 +109,9 @@ def get_emissions(infile, outfile=None, fuelin=None, emisin=None):
     if outfile is None:
         outfile = re.sub("\\.csv$", "_out.csv", infile)
     map = pd.read_csv(infile)
+    # TODO track count of these dropped record
     map = map[map["v_regnum"].notnull()]
+    map = map[map["v_lct"].notnull()]
 
     nfires = map.shape[0]
 
@@ -126,6 +128,7 @@ def get_emissions(infile, outfile=None, fuelin=None, emisin=None):
     herb = map["v_herb"].values
     bare = map["v_bare"].values
 
+    # as lct is used as array index, it has to be integer of some kind
     lct = map["v_lct"].values.astype(int)
     flct = map["f_lct"].values
 
